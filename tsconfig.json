@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "experimentalDecorators": true, // otherwise the @inject gives an error:  TS1238: Unable to resolve signature of class decorator when called as an expression. ref: https://www.bing.com/search?q=TS1238%3A+Unable+to+resolve+signature+of+class+decorator+when+called+as+an+expression.+%40inject+mobx-react&cvid=2d8a86d17d544251ac66f6936f49d165&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIGCAEQRRg60gEINzMxMGowajSoAgCwAgA&FORM=ANAB01&PC=LCTS
+    "noImplicitOverride": true,
+    "typeRoots": [
+      "src/customTypings",
+      "node_modules/@types"
+    ],
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext"
+  },
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}
