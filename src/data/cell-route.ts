@@ -33,6 +33,15 @@ export class CellRouteSegment {
   toString(): string {
     return "<" + this.p1 + "-" + this.p2 + ">"
   }
+
+  public topLeft(): LayoutPosition {
+    return LayoutPosition.topLeft(this.p1, this.p2);
+  }
+
+  public bottomRight(): LayoutPosition {
+    return LayoutPosition.bottomRight(this.p1, this.p2);
+  }
+
 }
 
 export class CellRoute {
@@ -120,6 +129,5 @@ export class CellRoute {
     // console.log("for route " + this + " num stairs " + numStairs);
     return numStairs;
   }
-
 
 }
