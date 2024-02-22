@@ -134,7 +134,7 @@ export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
         const prevCornerPlacement: {commonPointCorner: CornerMarker, adjacentVector: Vector} =
             this.calculateAdjacentSegmentRadiusDirection(prevSegment, routeSegment);
         const nextCornerPlacement: {commonPointCorner: CornerMarker, adjacentVector: Vector} =
-            this.calculateAdjacentSegmentRadiusDirection(prevSegment, routeSegment);
+            this.calculateAdjacentSegmentRadiusDirection(nextSegment, routeSegment);
 
         // const topLeftRadiusDirection= this.calculatePrevRadiusDirection(prevSegment, routeSegment);
 
@@ -259,21 +259,21 @@ export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
         const innerRadius: number = Math.max(radius - lineWidth, RouteWireSegment.minInnerRadius);
         const outerRadius: number = Math.max(radius, lineWidth + RouteWireSegment.minInnerRadius);
 
-        // if (nextCornerPlacement) {
-        //     if (nextCornerPlacement.commonPointCorner == CornerMarker.top_left) {
-        //         placement.main.p1 = new CanvasPosition(placement.main.p1.x, placement.main.p1.y + outerRadius);
-        //     } else {
-        //         placement.main.p2 = new CanvasPosition(placement.main.p1.x, placement.main.p1.y - outerRadius);
-        //     }
-        // }
+        if (nextCornerPlacement) {
+            if (nextCornerPlacement.commonPointCorner == CornerMarker.top_left) {
+                placement.main.p1 = new CanvasPosition(placement.main.p1.x, placement.main.p1.y + outerRadius);
+            } else {
+                placement.main.p2 = new CanvasPosition(placement.main.p2.x, placement.main.p2.y - outerRadius);
+            }
+        }
 
         if (prevCornerPlacement) {
 
-            // if (prevCornerPlacement.commonPointCorner == CornerMarker.top_left) {
-            //     placement.main.p1 = new CanvasPosition(placement.main.p1.x, placement.main.p1.y + outerRadius);
-            // } else {
-            //     placement.main.p2 = new CanvasPosition(placement.main.p1.x, placement.main.p1.y - outerRadius);
-            // }
+            if (prevCornerPlacement.commonPointCorner == CornerMarker.top_left) {
+                placement.main.p1 = new CanvasPosition(placement.main.p1.x, placement.main.p1.y + outerRadius);
+            } else {
+                placement.main.p2 = new CanvasPosition(placement.main.p2.x, placement.main.p2.y - outerRadius);
+            }
 
             placement.radius = {
                 innerRadiusRectangle: new AbsoluteRectangle(),
@@ -293,14 +293,13 @@ export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
                 placement.radius.innerRadiusRectangle.p1.y + commonPointYDirection * innerRadius);
 
             placement.radius.outerRadiusRectangle.p1 = new CanvasPosition(
-                commonPoint.x + adjacentVector.xDirection * halfLineWidth,
-                commonPoint.y + commonPointYDirection * halfLineWidth);
+                commonPoint.x + -adjacentVector.xDirection * halfLineWidth,
+                commonPoint.y + -commonPointYDirection * halfLineWidth);
             placement.radius.outerRadiusRectangle.p2 = new CanvasPosition(
                 placement.radius.outerRadiusRectangle.p1.x + adjacentVector.xDirection * outerRadius,
                 placement.radius.outerRadiusRectangle.p1.y + commonPointYDirection * outerRadius);
 
-            placement.radius.borderStyle.set("borderStyle", "solid solid solid solid");
-            placement.radius.borderStyle.set("borderRadius", "0 0 0 0");
+            placement.radius.borderStyle = this.calculateBorderStyle(adjacentVector.xDirection, commonPointYDirection);
 
         }
 
@@ -323,21 +322,21 @@ export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
         const innerRadius: number = Math.max(radius - lineWidth, RouteWireSegment.minInnerRadius);
         const outerRadius: number = Math.max(radius, lineWidth + RouteWireSegment.minInnerRadius);
 
-        // if (nextCornerPlacement) {
-        //     if (nextCornerPlacement.commonPointCorner == CornerMarker.top_left) {
-        //         placement.main.p1 = new CanvasPosition(placement.main.p1.x + outerRadius, placement.main.p1.y);
-        //     } else {
-        //         placement.main.p2 = new CanvasPosition(placement.main.p1.x - outerRadius, placement.main.p1.y);
-        //     }
-        // }
+        if (nextCornerPlacement) {
+            if (nextCornerPlacement.commonPointCorner == CornerMarker.top_left) {
+                placement.main.p1 = new CanvasPosition(placement.main.p1.x + outerRadius, placement.main.p1.y);
+            } else {
+                placement.main.p2 = new CanvasPosition(placement.main.p2.x - outerRadius, placement.main.p2.y);
+            }
+        }
 
         if (prevCornerPlacement) {
 
-            // if (prevCornerPlacement.commonPointCorner == CornerMarker.top_left) {
-            //     placement.main.p1 = new CanvasPosition(placement.main.p1.x + outerRadius, placement.main.p1.y);
-            // } else {
-            //     placement.main.p2 = new CanvasPosition(placement.main.p1.x - outerRadius, placement.main.p1.y);
-            // }
+            if (prevCornerPlacement.commonPointCorner == CornerMarker.top_left) {
+                placement.main.p1 = new CanvasPosition(placement.main.p1.x + outerRadius, placement.main.p1.y);
+            } else {
+                placement.main.p2 = new CanvasPosition(placement.main.p2.x - outerRadius, placement.main.p1.y);
+            }
 
             placement.radius = {
                 innerRadiusRectangle: new AbsoluteRectangle(),
@@ -357,19 +356,43 @@ export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
                 placement.radius.innerRadiusRectangle.p1.y + adjacentVector.yDirection * innerRadius);
 
             placement.radius.outerRadiusRectangle.p1 = new CanvasPosition(
-                commonPoint.x + commonPointXDirection * halfLineWidth,
-                commonPoint.y + adjacentVector.yDirection * halfLineWidth);
+                commonPoint.x + -commonPointXDirection * halfLineWidth,
+                commonPoint.y + -adjacentVector.yDirection * halfLineWidth);
             placement.radius.outerRadiusRectangle.p2 = new CanvasPosition(
                 placement.radius.outerRadiusRectangle.p1.x + commonPointXDirection * outerRadius,
                 placement.radius.outerRadiusRectangle.p1.y + adjacentVector.yDirection * outerRadius);
 
-            placement.radius.borderStyle.set("borderStyle", "solid solid solid solid");
-            placement.radius.borderStyle.set("borderRadius", "0 0 0 0");
+            placement.radius.borderStyle = this.calculateBorderStyle(commonPointXDirection, adjacentVector.yDirection);
 
         }
 
         return placement;
 
+    }
+
+    private calculateBorderStyle(xDirection: number, yDirection: number): Map<string, string> {
+
+        const style: Map<string, string> = new Map<string, string>();
+
+        if (xDirection < 0 && yDirection < 0) {
+            // bottom_right
+            style.set("borderStyle", "none solid solid none");
+            style.set("borderRadius", "0 0 100% 0");
+        } else if (xDirection < 0 && yDirection > 0) {
+            // bottom_left
+            style.set("borderStyle", "solid solid none none");
+            style.set("borderRadius", "0 100% 0 0");
+        } else if (xDirection > 0 && yDirection < 0) {
+            // top_right
+            style.set("borderStyle", "none none solid solid");
+            style.set("borderRadius", "0 0 0 100%");
+        } else if (xDirection > 0 && yDirection > 0) {
+            // top_left
+            style.set("borderStyle", "solid none none solid");
+            style.set("borderRadius", "100% 0 0 0");
+        }
+
+        return style;
     }
 
     // private drawVerticalSegment(key: string,
