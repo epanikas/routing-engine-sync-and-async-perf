@@ -6,18 +6,18 @@ import {BoxSize} from "../../../data/box-size";
 
 
 export class RouteWireSegmentProps {
-  routeId: string
-  cellSize: BoxSize;
-  routeSegment: CellRouteSegment;
-  lineWidth: number;
-  radius: number;
-  color: string;
-  prevSegment?: CellRouteSegment;
-  nextSegment?: CellRouteSegment;
+    routeId: string
+    cellSize: BoxSize;
+    routeSegment: CellRouteSegment;
+    lineWidth: number;
+    radius: number;
+    color: string;
+    prevSegment?: CellRouteSegment;
+    nextSegment?: CellRouteSegment;
 }
 
 export enum RadiusDirection {
-    straight, top_left, top_right, bottom_left, bottom_right;
+    straight, top_left, top_right, bottom_left, bottom_right
 }
 
 export class AbsoluteRectangle {
@@ -26,7 +26,7 @@ export class AbsoluteRectangle {
     width: number;
     height: number;
 
-    toStyle(additoinalCssProperties: Map<string, string> = undefined): CSSProperties {
+    toStyle(additionalCssProperties: Map<string, string> = undefined): CSSProperties {
         const res: CSSProperties = {
             position: "absolute",
             top: this.top + "px",
@@ -34,8 +34,8 @@ export class AbsoluteRectangle {
             width: this.width + "px",
             height: this.height + "px",
         };
-        if (additoinalCssProperties) {
-            for (let entry of additoinalCssProperties.entries()) {
+        if (additionalCssProperties) {
+            for (let entry of additionalCssProperties.entries()) {
                 res[entry[0]] = entry[1];
             }
         }
@@ -45,69 +45,61 @@ export class AbsoluteRectangle {
 
 export class RouteSegmentPlacement {
     main: AbsoluteRectangle;
-    // borderRadius: {
-    //     topLeft: number;
-    //     topRight: number;
-    //     bottomLeft: number;
-    //     bottomRight: number;
-    // }
-    topLeft: AbsoluteRectangle;
-    topRight: AbsoluteRectangle;
-    bottomLeft: AbsoluteRectangle;
-    bottomRight: AbsoluteRectangle;
+    radius: {
+        innerRadiusRectangle: AbsoluteRectangle,
+        outerRadiusRectangle: AbsoluteRectangle,
+        borderStyle: Map<string, string>
+    };
 
-    // constructor() {
-    //     this.borderRadius = {topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0}
-    // }
+    constructor() {
+        this.main = new AbsoluteRectangle();
+    }
+
 }
 
 export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
 
+    private static minInnerRadius: number = 10;
+
 
     public override render(): JSX.Element {
-        const {prevSegment, nextSegment, cellSize, routeId, routeSegment, color} = this.props;
-
+        const {routeId, routeSegment} = this.props;
 
         const key: string = routeId + routeSegment.getP1() + routeSegment.getP2();
 
         const segmentPlacement: RouteSegmentPlacement = this.calculateRouteSegmentPlacement();
 
-        // if (routeSegment.isVertical()) {
-        //     return this.drawVerticalSegment(key, prevSegment, nextSegment, topLeftCanvas, bottomRightCanvas);
-        // } else {
-        //     return this.drawHorizontalSegment(key, prevSegment, nextSegment, topLeftCanvas, bottomRightCanvas);
-        // }
-
-        // const mainStyle: CSSProperties = {
-        //     position: "absolute",
-        //     top: segmentPlacement.top + "px",
-        //     left: segmentPlacement.left + "px",
-        //     width: segmentPlacement.width + "px",
-        //     height: segmentPlacement.height + "px",
-        //     border: "1px solid " + (routeSegment.isVertical() ? "red" : "blue"),
-        //     // backgroundColor: color
-        // };
         const border = new Map<string, string>();
         border.set("border", "1px solid " + (routeSegment.isVertical() ? "red" : "blue"));
-        // const mainStyle: CSSProperties = segmentPlacement.main.toStyle(border);
-        // mainStyle.border = "1px solid " + (routeSegment.isVertical() ? "red" : "blue");
+        // const innerBorder = new Map<string, string>();
+        // innerBorder.set("borderStyle", "solid solid none none");
+        // innerBorder.set("borderWidth", "1px")
+        // innerBorder.set("borderColor", "green")
+        // innerBorder.set("borderRadius", "0 100% 0 0");
+        // const outerBorder = new Map<string, string>();
+        // outerBorder.set("borderStyle", "solid solid none none");
+        // outerBorder.set("borderWidth", "1px")
+        // outerBorder.set("borderColor", "black")
+        // outerBorder.set("borderRadius", "0 100% 0 0");
 
-        let radiusDiv: JSX.Element;
+        let innerRadiusDiv: JSX.Element, outerRadiusDiv: JSX.Element;
 
-        if (segmentPlacement.topLeft) {
-            radiusDiv = <div key={key + "-radius"} style={segmentPlacement.topLeft.toStyle(border)}></div>;
-        } else if (segmentPlacement.topRight) {
-            radiusDiv = <div key={key + "-radius"} style={segmentPlacement.topRight.toStyle(border)}></div>;
-        } else if (segmentPlacement.bottomLeft) {
-            radiusDiv = <div key={key + "-radius"} style={segmentPlacement.bottomLeft.toStyle(border)}></div>;
-        } else if (segmentPlacement.bottomRight) {
-            radiusDiv = <div key={key + "-radius"} style={segmentPlacement.bottomRight.toStyle(border)}></div>;
+        if (segmentPlacement.radius) {
+            const innerBorder: Map<string, string> = new Map(segmentPlacement.radius.borderStyle);
+            innerBorder.set("borderWidth", "1px")
+            innerBorder.set("borderColor", "green")
+            const outerBorder: Map<string, string> = new Map(segmentPlacement.radius.borderStyle);
+            outerBorder.set("borderWidth", "1px")
+            outerBorder.set("borderColor", "black")
+            innerRadiusDiv = <div key={key + "-inner-radius"} style={segmentPlacement.radius.innerRadiusRectangle.toStyle(innerBorder)}></div>;
+            outerRadiusDiv = <div key={key + "-outer-radius"} style={segmentPlacement.radius.outerRadiusRectangle.toStyle(outerBorder)}></div>;
         }
 
         return (
             <div>
                 <div key={key + "-main"} style={segmentPlacement.main.toStyle(border)}></div>
-                {radiusDiv}
+                {innerRadiusDiv}
+                {outerRadiusDiv}
             </div>
         );
     }
@@ -124,73 +116,27 @@ export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
         const topLeft: LayoutPosition = routeSegment.topLeft();
         const bottomRight: LayoutPosition = routeSegment.bottomRight();
 
+        const {topLeftAdjacentSegment, bottomRightAdjacentSegment } =
+            this.calculateAdjacentSegments(prevSegment, nextSegment, routeSegment);
 
-        const {topLeftAdjacentSegment, bottomRightAdjacentSegment} = this.calculateAdjacentSegments(prevSegment, nextSegment, routeSegment);
-
-        const { topLeftRadiusDirection, bottomRightRadiusDirection } =
-            this.calculateRadiusDirections(topLeftAdjacentSegment, bottomRightAdjacentSegment, routeSegment);
-
-
-        // let topLeftRadiusDirection: RadiusDirection = RadiusDirection.straight;
-        // let bottomRightRadiusDirection: RadiusDirection = RadiusDirection.straight;
-        //
-        // if (topLeftAdjacentSegment != undefined) {
-        //     // topLeftRadiusDirection = this.calculateRadiusDirection(routeSegment.topLeft(), true, topLeftAdjacentSegment, routeSegment.isVertical());
-        //     if (routeSegment.isVertical()) {
-        //         if (topLeftAdjacentSegment.topLeft().x < routeSegment.topLeft().x) {
-        //             topLeftRadiusDirection = RadiusDirection.top_left;
-        //         } else if (topLeftAdjacentSegment.bottomRight().x > routeSegment.topLeft().x) {
-        //             topLeftRadiusDirection = RadiusDirection.top_right;
-        //         }
-        //     } else {
-        //         if (topLeftAdjacentSegment.topLeft().y < routeSegment.topLeft().y) {
-        //             topLeftRadiusDirection = RadiusDirection.top_left;
-        //         } else if (topLeftAdjacentSegment.bottomRight().x > routeSegment.topLeft().x) {
-        //             topLeftRadiusDirection = RadiusDirection.top_right;
-        //         }
-        //     }
-        // }
-        // if (bottomRightAdjacentSegment != undefined) {
-        //     // bottomRightRadiusDirection = this.calculateRadiusDirection(routeSegment.bottomRight(), false, bottomRightAdjacentSegment, routeSegment.isVertical());
-        //     if (routeSegment.isVertical()) {
-        //         if (bottomRightAdjacentSegment.topLeft().x < routeSegment.bottomRight().x) {
-        //             bottomRightRadiusDirection = RadiusDirection.top_left;
-        //         } else if (bottomRightAdjacentSegment.bottomRight().x > routeSegment.bottomRight().x) {
-        //             bottomRightRadiusDirection = RadiusDirection.top_right;
-        //         }
-        //     } else {
-        //         if (bottomRightAdjacentSegment.topLeft().y < routeSegment.bottomRight().y) {
-        //             bottomRightRadiusDirection = RadiusDirection.top_left;
-        //         } else if (bottomRightAdjacentSegment.bottomRight().x > routeSegment.bottomRight().x) {
-        //             bottomRightRadiusDirection = RadiusDirection.top_right;
-        //         }
-        //     }
-        // }
-
-
-
-
-        // if (prevSegment != undefined) {
-        //     const prevTopLeft: LayoutPosition = prevSegment.topLeft();
-        //     const prevBottomRight: LayoutPosition = prevSegment.bottomRight();
-        // }
-
+        const topLeftRadiusDirection =
+            this.calculateTopLeftRadiusDirection(topLeftAdjacentSegment, routeSegment);
 
         const topLeftCanvas: CanvasPosition = topLeft.toCanvasPosition(cellSize);
         const bottomRightCanvas: CanvasPosition = bottomRight.toCanvasPosition(cellSize);
 
-
         if (routeSegment.isVertical()) {
-            return this.calculateRouteSegmentPlacementForVertical(topLeftCanvas, bottomRightCanvas, radiusDirection);
+            return this.calculateRouteSegmentPlacementForVertical(topLeftCanvas, bottomRightCanvas, topLeftRadiusDirection, bottomRightAdjacentSegment != undefined);
         } else {
-            return this.calculateRouteSegmentPlacementForHorizontal(topLeftCanvas, bottomRightCanvas, radiusDirection);
+            return this.calculateRouteSegmentPlacementForHorizontal(topLeftCanvas, bottomRightCanvas, topLeftRadiusDirection, bottomRightAdjacentSegment != undefined);
         }
 
     }
 
     private calculateAdjacentSegments(prevSegment: CellRouteSegment,
                                       nextSegment: CellRouteSegment,
-                                      routeSegment: CellRouteSegment): { topLeftAdjacentSegment: CellRouteSegment, bottomRightAdjacentSegment: CellRouteSegment} {
+                                      routeSegment: CellRouteSegment): {topLeftAdjacentSegment: CellRouteSegment, bottomRightAdjacentSegment: CellRouteSegment} {
+
         let topLeftAdjacentSegment: CellRouteSegment = undefined;
         let bottomRightAdjacentSegment: CellRouteSegment = undefined;
 
@@ -214,10 +160,9 @@ export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
 
     }
 
-    private calculateRadiusDirections(topLeftAdjacentSegment: CellRouteSegment, bottomRightAdjacentSegment: CellRouteSegment, routeSegment: CellRouteSegment): {topLeftRadiusDirection: RadiusDirection, bottomRightRadiusDirection: RadiusDirection} {
+    private calculateTopLeftRadiusDirection(topLeftAdjacentSegment: CellRouteSegment, routeSegment: CellRouteSegment): RadiusDirection {
 
         let topLeftRadiusDirection: RadiusDirection = RadiusDirection.straight;
-        let bottomRightRadiusDirection: RadiusDirection = RadiusDirection.straight;
 
         if (topLeftAdjacentSegment != undefined) {
             // topLeftRadiusDirection = this.calculateRadiusDirection(routeSegment.topLeft(), true, topLeftAdjacentSegment, routeSegment.isVertical());
@@ -235,74 +180,64 @@ export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
                 }
             }
         }
-        if (bottomRightAdjacentSegment != undefined) {
-            // bottomRightRadiusDirection = this.calculateRadiusDirection(routeSegment.bottomRight(), false, bottomRightAdjacentSegment, routeSegment.isVertical());
-            if (routeSegment.isVertical()) {
-                if (bottomRightAdjacentSegment.topLeft().x < routeSegment.bottomRight().x) {
-                    bottomRightRadiusDirection = RadiusDirection.top_left;
-                } else if (bottomRightAdjacentSegment.bottomRight().x > routeSegment.bottomRight().x) {
-                    bottomRightRadiusDirection = RadiusDirection.top_right;
-                }
-            } else {
-                if (bottomRightAdjacentSegment.topLeft().y < routeSegment.bottomRight().y) {
-                    bottomRightRadiusDirection = RadiusDirection.top_left;
-                } else if (bottomRightAdjacentSegment.bottomRight().x > routeSegment.bottomRight().x) {
-                    bottomRightRadiusDirection = RadiusDirection.top_right;
-                }
-            }
-        }
 
-        return {topLeftRadiusDirection, bottomRightRadiusDirection};
+        return topLeftRadiusDirection;
     }
-
-    // private calculateRadiusDirection(routeCorner: LayoutPosition, isTopLeft: boolean, adjacentSegment: CellRouteSegment, isVertical: boolean): RadiusDirection {
-    //     if (routeSegment.isVertical()) {
-    //         if (topLeftAdjacentSegment.topLeft().x < routeSegment.topLeft().x) {
-    //             topLeftRadiusDirection = RadiusDirection.top_left;
-    //         } else if (topLeftAdjacentSegment.bottomRight().x > routeSegment.topLeft().x) {
-    //             topLeftRadiusDirection = RadiusDirection.top_right;
-    //         }
-    //     } else {
-    //         if (topLeftAdjacentSegment.topLeft().y < routeSegment.topLeft().y) {
-    //             topLeftRadiusDirection = RadiusDirection.top_left;
-    //         } else if (topLeftAdjacentSegment.bottomRight().x > routeSegment.topLeft().x) {
-    //             topLeftRadiusDirection = RadiusDirection.top_right;
-    //         }
-    //     }
-    //
-    // }
 
     private calculateRouteSegmentPlacementForVertical(topLeftCanvas: CanvasPosition,
                                                       bottomRightCanvas: CanvasPosition,
-                                                      radiusDirection: RadiusDirection): RouteSegmentPlacement {
+                                                      topLeftRadiusDirection: RadiusDirection,
+                                                      hasBottomRightAdjacentSegment: boolean): RouteSegmentPlacement {
 
-        const {prevSegment, nextSegment, cellSize, routeId, routeSegment, lineWidth, radius} = this.props;
+        const { lineWidth, radius} = this.props;
 
         let placement: RouteSegmentPlacement = new RouteSegmentPlacement();
-        placement.top = topLeftCanvas.y - lineWidth / 2;
-        placement.left = topLeftCanvas.x - lineWidth / 2;
-        placement.width = lineWidth;
-        placement.height = bottomRightCanvas.y - topLeftCanvas.y + lineWidth;
+        placement.main.top = topLeftCanvas.y - lineWidth / 2;
+        placement.main.left = topLeftCanvas.x - lineWidth / 2;
+        placement.main.width = lineWidth;
+        placement.main.height = bottomRightCanvas.y - topLeftCanvas.y + lineWidth;
 
-        if (!prevSegment) {
-            placement.borderRadius.topLeft = lineWidth / 2;
-            placement.borderRadius.topRight = lineWidth / 2;
-        } else {
-            if (!prevSegment.isVertical()) {
-                placement.top += radius;
-                placement.height -= radius;
-            }
+        return placement;
+
+        const outerRadius: number = Math.max(radius, lineWidth + RouteWireSegment.minInnerRadius);
+
+        if (hasBottomRightAdjacentSegment) {
+            placement.main.height -= outerRadius;
         }
 
-        if (!nextSegment) {
-            placement.top -= lineWidth / 2;
-            placement.height += lineWidth;
-            placement.borderRadius.bottomLeft = lineWidth / 2;
-            placement.borderRadius.bottomRight = lineWidth / 2;
-        } else {
-            if (!nextSegment.isVertical()) {
-                placement.height = topLeftCanvas.y - radius;
+        if (topLeftRadiusDirection) {
+            placement.radius = {
+                innerRadiusRectangle: new AbsoluteRectangle(),
+                outerRadiusRectangle: new AbsoluteRectangle(),
+                borderStyle: new Map<string, string>()
+            };
+
+            const innerRadius: number = Math.max(radius - lineWidth, RouteWireSegment.minInnerRadius);
+            placement.radius.innerRadiusRectangle.top = placement.main.top + lineWidth;
+            placement.radius.innerRadiusRectangle.width = innerRadius;
+            placement.radius.innerRadiusRectangle.height = innerRadius;
+            if (topLeftRadiusDirection == RadiusDirection.top_left) {
+                placement.radius.innerRadiusRectangle.left = placement.main.left - innerRadius;
+                placement.radius.borderStyle.set("borderStyle", "solid solid none none");
+                placement.radius.borderStyle.set("borderRadius", "0 100% 0 0");
+            } else {
+                placement.radius.innerRadiusRectangle.left = placement.main.left + placement.main.width;
+                placement.radius.borderStyle.set("borderStyle", "solid none none solid");
+                placement.radius.borderStyle.set("borderRadius", "100% 0 0 0");
             }
+
+            placement.radius.outerRadiusRectangle.top = placement.main.top;
+            placement.radius.outerRadiusRectangle.width = outerRadius;
+            placement.radius.outerRadiusRectangle.height = outerRadius;
+            if (topLeftRadiusDirection == RadiusDirection.top_left) {
+                placement.radius.outerRadiusRectangle.left = placement.main.left + placement.main.width - outerRadius;
+            } else {
+                placement.radius.outerRadiusRectangle.left = placement.main.left;
+            }
+
+            placement.main.top += outerRadius;
+            placement.main.height -= outerRadius;
+
         }
 
         return placement;
@@ -311,15 +246,59 @@ export class RouteWireSegment extends React.Component<RouteWireSegmentProps> {
 
     private calculateRouteSegmentPlacementForHorizontal(topLeftCanvas: CanvasPosition,
                                                         bottomRightCanvas: CanvasPosition,
-                                                        radiusDirection: RadiusDirection): RouteSegmentPlacement {
+                                                        topLeftRadiusDirection: RadiusDirection,
+                                                        hasBottomRightAdjacentSegment: boolean): RouteSegmentPlacement {
 
         const {prevSegment, nextSegment, cellSize, routeId, routeSegment, lineWidth, radius} = this.props;
 
         let placement: RouteSegmentPlacement = new RouteSegmentPlacement();
-        placement.top = topLeftCanvas.y - lineWidth / 2;
-        placement.left = topLeftCanvas.x - lineWidth / 2;
-        placement.width = bottomRightCanvas.x - topLeftCanvas.x + lineWidth;
-        placement.height = lineWidth;
+        placement.main.top = topLeftCanvas.y - lineWidth / 2;
+        placement.main.left = topLeftCanvas.x - lineWidth / 2;
+        placement.main.width = bottomRightCanvas.x - topLeftCanvas.x + lineWidth;
+        placement.main.height = lineWidth;
+
+        const outerRadius: number = Math.max(radius, lineWidth + RouteWireSegment.minInnerRadius);
+
+        if (hasBottomRightAdjacentSegment) {
+            placement.main.width -= outerRadius;
+        }
+
+        if (topLeftRadiusDirection) {
+            placement.radius = {
+                innerRadiusRectangle: new AbsoluteRectangle(),
+                outerRadiusRectangle: new AbsoluteRectangle(),
+                borderStyle: new Map<string, string>()
+            };
+
+            const innerRadius: number = Math.max(radius - lineWidth, RouteWireSegment.minInnerRadius);
+
+
+            if (topLeftRadiusDirection == RadiusDirection.top_left) {
+                placement.radius.innerRadiusRectangle.top = placement.main.top + placement.main.height - outerRadius;
+                placement.radius.borderStyle.set("borderStyle", "none none solid solid");
+                placement.radius.borderStyle.set("borderRadius", "0 0 0 100%");
+            } else {
+                placement.radius.innerRadiusRectangle.top = placement.main.top - innerRadius;
+                placement.radius.borderStyle.set("borderStyle", "none none solid solid");
+                placement.radius.borderStyle.set("borderRadius", "0 0 0 0");
+            }
+            placement.radius.innerRadiusRectangle.left = placement.main.left + outerRadius - innerRadius;
+            placement.radius.innerRadiusRectangle.width = innerRadius;
+            placement.radius.innerRadiusRectangle.height = innerRadius;
+
+            if (topLeftRadiusDirection == RadiusDirection.top_left) {
+                placement.radius.outerRadiusRectangle.top = placement.main.top + placement.main.height - outerRadius;
+            } else {
+
+            }
+            placement.radius.outerRadiusRectangle.left = placement.main.left;
+            placement.radius.outerRadiusRectangle.width = outerRadius;
+            placement.radius.outerRadiusRectangle.height = outerRadius;
+
+            placement.main.left += outerRadius;
+            placement.main.width -= outerRadius;
+
+        }
 
         return placement;
     }

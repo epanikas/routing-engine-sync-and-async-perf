@@ -31,6 +31,10 @@ export class AsyncEngineView extends React.Component<AsyncEngineViewProps> {
             new LayoutPosition(2, 3),
             new LayoutPosition(3, 3),
             new LayoutPosition(3, 4),
+            new LayoutPosition(5, 4),
+            new LayoutPosition(5, 3),
+            new LayoutPosition(6, 3),
+            new LayoutPosition(6, 2),
         ]);
 
         return (
