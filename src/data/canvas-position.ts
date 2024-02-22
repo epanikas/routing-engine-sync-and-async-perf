@@ -12,4 +12,8 @@ export class CanvasPosition {
   toString(): string {
     return "{" + this.x + "; " + this.y + "}";
   }
+
+  public static topLeft(p1: CanvasPosition, p2: CanvasPosition): CanvasPosition {
+    return new CanvasPosition(Math.min(p1.x, p2.x), Math.min(p1.y, p2.y));
+  }
 }
